@@ -99,6 +99,31 @@ curl http://127.0.0.1:8000/api/audit-logs ^
   -H "Authorization: Bearer <access_token>"
 ```
 
+## 文件上传与对象存储
+
+对象存储使用 MinIO/S3 兼容接口，相关环境变量：
+
+- `MINIO_ENDPOINT`：MinIO 地址，例如 `http://localhost:9000`
+- `MINIO_BUCKET`：原始文件 bucket
+- `MINIO_ROOT_USER`：访问密钥
+- `MINIO_ROOT_PASSWORD`：访问密钥密码
+- `MINIO_SECURE`：是否使用 HTTPS
+
+上传接口需要 `upload:write` 权限，支持 `.fcs`、`.lmd`、`.csv`：
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/uploads ^
+  -H "Authorization: Bearer <access_token>" ^
+  -F "files=@sample.csv"
+```
+
+查询上传批次：
+
+```bash
+curl http://127.0.0.1:8000/api/uploads/1 ^
+  -H "Authorization: Bearer <access_token>"
+```
+
 数据库健康检查：
 
 ```bash

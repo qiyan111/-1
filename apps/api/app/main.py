@@ -11,6 +11,7 @@ from app.core.config import get_settings
 from app.core.exceptions import AppError, register_exception_handlers
 from app.db.health import check_database_connection
 from app.db.session import get_db
+from app.uploads.router import router as uploads_router
 
 
 def create_app() -> FastAPI:
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
     register_exception_handlers(application)
     application.include_router(auth_router)
     application.include_router(audit_router)
+    application.include_router(uploads_router)
 
     @application.get("/health", tags=["system"])
     def health() -> dict[str, str]:

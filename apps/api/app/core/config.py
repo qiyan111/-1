@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     minio_bucket: str = "flow-cytometry-raw"
     minio_root_user: str = "minioadmin"
     minio_root_password: str = "minioadmin"
+    minio_secure: bool = False
 
     jwt_secret: str = Field(
         default="change-me-in-development",
