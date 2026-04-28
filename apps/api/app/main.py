@@ -5,9 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.audit.router import router as audit_router
+from app.auth.router import router as auth_router
 from app.core.config import get_settings
 from app.core.exceptions import AppError, register_exception_handlers
-from app.auth.router import router as auth_router
 from app.db.health import check_database_connection
 from app.db.session import get_db
 
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     )
     register_exception_handlers(application)
     application.include_router(auth_router)
+    application.include_router(audit_router)
 
     @application.get("/health", tags=["system"])
     def health() -> dict[str, str]:

@@ -92,6 +92,13 @@ curl http://127.0.0.1:8000/api/auth/me ^
   -H "Authorization: Bearer <access_token>"
 ```
 
+审计日志查询，需要当前用户具备 `audit:read` 权限：
+
+```bash
+curl http://127.0.0.1:8000/api/audit-logs ^
+  -H "Authorization: Bearer <access_token>"
+```
+
 数据库健康检查：
 
 ```bash
