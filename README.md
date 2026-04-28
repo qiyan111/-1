@@ -1,6 +1,6 @@
 # 流式细胞术自动化分析与审核平台
 
-这是流式细胞术自动化分析与审核平台的 monorepo 骨架。当前阶段只包含可扩展的工程结构、基础服务编排、后端健康检查、worker 占位任务、前端 Vite 骨架和实施计划文档。
+这是流式细胞术自动化分析与审核平台的 monorepo 骨架。当前阶段包含基础服务编排、FastAPI 后端、Celery worker、文件解析、门控、统计、自动圈门和 CSV 自动分析流水线基础版。
 
 ## 目录结构
 
@@ -45,9 +45,12 @@ curl http://localhost:8000/health
 cd apps/worker
 python -m venv .venv
 .venv\\Scripts\\activate
+pip install -e ../api
 pip install -e .
 celery -A worker.main.celery_app worker --loglevel=info
 ```
+
+分析任务入口为 `analysis.run_pipeline`，参数为 `analysis_job.id`。当前流水线可跑通本地 CSV 文件；对象存储下载、FCS/LMD 真实解析和图像导出仍是后续工作。
 
 ## 启动前端
 
@@ -68,4 +71,3 @@ cd ../web && npm install && npm run build
 ## 下一步
 
 按照 [docs/implementation-plan.md](docs/implementation-plan.md) 继续实现 Task 01 到 Task 04：数据库模型、Alembic migration、JWT、RBAC、默认角色、审计日志服务和审计查询接口。
-

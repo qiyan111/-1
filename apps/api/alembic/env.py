@@ -7,7 +7,9 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import get_settings
 from app.db.base import Base
+import app.analysis.models  # noqa: F401
 import app.audit.models  # noqa: F401
+import app.plans.models  # noqa: F401
 import app.projects.models  # noqa: F401
 import app.templates.models  # noqa: F401
 import app.uploads.models  # noqa: F401

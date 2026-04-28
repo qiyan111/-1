@@ -13,9 +13,9 @@ class WorkerSettings(BaseSettings):
     )
 
     redis_url: str = "redis://localhost:6379/0"
+    database_url: str | None = None
 
 
 @lru_cache
 def get_settings() -> WorkerSettings:
     return WorkerSettings()
-

@@ -234,3 +234,90 @@ curl -X POST http://127.0.0.1:8000/api/templates/1/rollback ^
 ```
 
 rollback 会把模板恢复到指定版本快照，并生成新的当前版本，不覆盖旧版本。diff 当前返回图表、门控、逻辑门、统计规则和通道配置的摘要差异。本阶段 migration 新增 `analysis_templates`、`analysis_template_versions`、`template_plots`、`template_gates`、`template_logic_gates`、`template_statistics`。
+## 分析方案管理
+
+方案读取接口只要求登录；创建、更新、克隆、绑定模板、维护细胞标签树和 Marker 阈值需要 `template:write` 或 `admin:write` 权限。所有修改操作都会写入审计日志并生成新的方案版本快照。
+
+创建方案：
+```bash
+curl -X POST http://127.0.0.1:8000/api/plans ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"AML Analysis Plan\",\"project_id\":1,\"description\":\"baseline\",\"change_note\":\"initial plan\"}"
+```
+
+查询、更新、克隆和版本：
+```bash
+curl http://127.0.0.1:8000/api/plans ^
+  -H "Authorization: Bearer <access_token>"
+
+curl http://127.0.0.1:8000/api/plans/1 ^
+  -H "Authorization: Bearer <access_token>"
+
+curl -X PUT http://127.0.0.1:8000/api/plans/1 ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"Updated AML Plan\",\"change_note\":\"rename plan\"}"
+
+curl -X POST http://127.0.0.1:8000/api/plans/1/clone ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"AML Plan Clone\",\"change_note\":\"clone baseline\"}"
+
+curl http://127.0.0.1:8000/api/plans/1/versions ^
+  -H "Authorization: Bearer <access_token>"
+```
+
+绑定模板、细胞标签和 Marker 阈值：
+```bash
+curl -X POST http://127.0.0.1:8000/api/plans/1/template-bindings ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"template_id\":1,\"experiment_no\":\"EXP-001\",\"tube_no\":\"T-001\",\"change_note\":\"bind template\"}"
+
+curl -X POST http://127.0.0.1:8000/api/plans/1/cell-labels ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"code\":\"lym\",\"name\":\"Lymphocytes\",\"change_note\":\"add cell label\"}"
+
+curl -X POST http://127.0.0.1:8000/api/plans/1/marker-thresholds ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"marker\":\"CD3\",\"channel_name\":\"FL1-A\",\"threshold_value\":120.5,\"change_note\":\"add threshold\"}"
+```
+
+本阶段 migration 新增 `analysis_plans`、`analysis_plan_versions`、`plan_template_bindings`、`cell_label_nodes`、`marker_thresholds`。本阶段不启动自动分析、不做前端、不做门控计算。
+
+## 自动化分析队列基础
+
+本阶段只实现分析批次和任务入库、状态流转、任务日志查询，不启动 Celery worker，不解析 FCS，不执行门控计算。启动和重试需要 `analysis:execute` 权限；登录用户可查询自己启动的分析批次，管理员可查询全部。
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/uploads/1/start-analysis ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"plan_id\":1}"
+
+curl http://127.0.0.1:8000/api/analysis/batches ^
+  -H "Authorization: Bearer <access_token>"
+
+curl http://127.0.0.1:8000/api/analysis/batches/1 ^
+  -H "Authorization: Bearer <access_token>"
+
+curl -X POST http://127.0.0.1:8000/api/analysis/batches/1/pause ^
+  -H "Authorization: Bearer <access_token>"
+
+curl -X POST http://127.0.0.1:8000/api/analysis/batches/1/resume ^
+  -H "Authorization: Bearer <access_token>"
+
+curl -X POST http://127.0.0.1:8000/api/analysis/batches/1/cancel ^
+  -H "Authorization: Bearer <access_token>"
+
+curl -X POST http://127.0.0.1:8000/api/analysis/batches/1/retry ^
+  -H "Authorization: Bearer <access_token>"
+
+curl http://127.0.0.1:8000/api/analysis/jobs/1/logs ^
+  -H "Authorization: Bearer <access_token>"
+```
+
+状态枚举为 `PENDING`、`QUEUED`、`RUNNING`、`PAUSED`、`COMPLETED`、`FAILED`、`CANCELLED`。`start-analysis` 会为上传批次内每个文件创建一个 `QUEUED` 任务；暂停把未终态任务置为 `PAUSED`，继续恢复为 `QUEUED`，取消置为 `CANCELLED`，重试只把失败任务重新置为 `QUEUED` 并增加 attempt。状态变更均写审计日志。
