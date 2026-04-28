@@ -67,6 +67,31 @@ cd apps/api
 python -m app.users.seed
 ```
 
+默认管理员账号由以下环境变量控制：
+
+- `DEFAULT_ADMIN_EMAIL`
+- `DEFAULT_ADMIN_USERNAME`
+- `DEFAULT_ADMIN_PASSWORD`
+
+`python -m app.users.seed` 会创建默认角色、基础权限，并确保默认管理员账号拥有 `admin` 角色。若管理员已存在，脚本不会重置密码，只会确保账号启用且拥有管理员角色。
+
+## 认证接口
+
+登录：
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"admin\",\"password\":\"ChangeMe123!\"}"
+```
+
+当前用户：
+
+```bash
+curl http://127.0.0.1:8000/api/auth/me ^
+  -H "Authorization: Bearer <access_token>"
+```
+
 数据库健康检查：
 
 ```bash

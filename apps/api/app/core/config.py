@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     )
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    default_admin_email: str = "admin@example.com"
+    default_admin_username: str = "admin"
+    default_admin_password: str = "ChangeMe123!"
 
     @field_validator("cors_origins", mode="before")
     @classmethod

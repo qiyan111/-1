@@ -3,8 +3,10 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.auth.security import hash_password
+from app.core.config import get_settings
 from app.db.session import get_sessionmaker
-from app.users.models import Permission, Role
+from app.users.models import Permission, Role, User
 
 DEFAULT_ROLES: tuple[dict[str, str], ...] = (
     {"code": "admin", "name": "管理员", "description": "系统全权限管理员"},
@@ -140,12 +142,53 @@ def seed_rbac_defaults(db: Session) -> None:
     db.commit()
 
 
+def seed_default_admin(
+    db: Session,
+    *,
+    email: str,
+    username: str,
+    password: str,
+) -> User:
+    seed_rbac_defaults(db)
+    admin_role = db.scalar(select(Role).where(Role.code == "admin"))
+    if admin_role is None:
+        raise RuntimeError("Default admin role was not created")
+
+    user = db.scalar(
+        select(User).where((User.email == email) | (User.username == username))
+    )
+    if user is None:
+        user = User(
+            email=email,
+            username=username,
+            hashed_password=hash_password(password),
+            is_active=True,
+            is_locked=False,
+        )
+        db.add(user)
+        db.flush()
+    else:
+        user.is_active = True
+        user.is_locked = False
+
+    if admin_role not in user.roles:
+        user.roles.append(admin_role)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 def main() -> None:
+    settings = get_settings()
     session_factory = get_sessionmaker()
     with session_factory() as db:
-        seed_rbac_defaults(db)
+        seed_default_admin(
+            db,
+            email=settings.default_admin_email,
+            username=settings.default_admin_username,
+            password=settings.default_admin_password,
+        )
 
 
 if __name__ == "__main__":
     main()
-

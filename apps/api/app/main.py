@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.exceptions import AppError, register_exception_handlers
+from app.auth.router import router as auth_router
 from app.db.health import check_database_connection
 from app.db.session import get_db
 
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     register_exception_handlers(application)
+    application.include_router(auth_router)
 
     @application.get("/health", tags=["system"])
     def health() -> dict[str, str]:
