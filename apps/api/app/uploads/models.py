@@ -38,6 +38,10 @@ class DataFile(Base):
         ForeignKey("upload_batches.id", ondelete="CASCADE"),
         index=True,
     )
+    tube_id: Mapped[int | None] = mapped_column(
+        ForeignKey("tubes.id", ondelete="SET NULL"),
+        index=True,
+    )
     uploaded_by_user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="RESTRICT"),
         index=True,
@@ -56,4 +60,4 @@ class DataFile(Base):
     )
 
     batch: Mapped[UploadBatch] = relationship(back_populates="files")
-
+    tube: Mapped[Tube | None] = relationship("Tube", back_populates="data_files")

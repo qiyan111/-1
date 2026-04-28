@@ -129,3 +129,54 @@ curl http://127.0.0.1:8000/api/uploads/1 ^
 ```bash
 curl http://127.0.0.1:8000/health/db
 ```
+
+## 流式数据业务元数据
+
+元数据接口均需要登录。读取接口需要有效 JWT，创建接口需要 `upload:write` 或 `admin:write` 权限，创建成功会写入审计日志。
+
+创建 project：
+```bash
+curl -X POST http://127.0.0.1:8000/api/projects ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"code\":\"P001\",\"name\":\"Leukemia Panel\"}"
+```
+
+查询 project 列表：
+```bash
+curl http://127.0.0.1:8000/api/projects ^
+  -H "Authorization: Bearer <access_token>"
+```
+
+创建 experiment、sample、tube：
+```bash
+curl -X POST http://127.0.0.1:8000/api/experiments ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"project_id\":1,\"experiment_no\":\"EXP-001\",\"name\":\"Day 1\"}"
+
+curl -X POST http://127.0.0.1:8000/api/samples ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"experiment_id\":1,\"sample_no\":\"S-001\"}"
+
+curl -X POST http://127.0.0.1:8000/api/tubes ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"sample_id\":1,\"tube_no\":\"T-001\",\"data_file_ids\":[1]}"
+```
+
+创建 tube 通道与 Marker 映射：
+```bash
+curl -X POST http://127.0.0.1:8000/api/tubes/1/channels ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"FL1-A\",\"detector\":\"FL1\",\"fluorochrome\":\"FITC\",\"marker\":\"CD3\",\"channel_index\":1}"
+
+curl -X POST http://127.0.0.1:8000/api/tubes/1/marker-mappings ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"marker\":\"CD3\",\"channel_name\":\"FL1-A\",\"fluorochrome\":\"FITC\"}"
+```
+
+本阶段 migration 新增 `projects`、`experiments`、`samples`、`tubes`、`channels`、`marker_mappings`、`compensation_matrices`，并为 `data_files` 增加可空的 `tube_id` 关联字段。
