@@ -1,0 +1,11 @@
+[project]
+name = "flow-cytometry-worker"
+version = "0.1.0"
+description = "Celery worker for the flow cytometry automation platform."
+requires-python = ">=3.11"
+dependencies = [
+  "celery>=5.3",
+  "pydantic-settings>=2.2",
+  "redis>=5.0",
+]
+

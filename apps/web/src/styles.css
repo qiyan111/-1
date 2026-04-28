@@ -1,0 +1,121 @@
+:root {
+  color: #1f2937;
+  background: #f7f8fa;
+  font-family:
+    Inter, "Segoe UI", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app-shell__sidebar {
+  border-right: 1px solid #d7dce2;
+  background: #ffffff;
+  padding: 20px 16px;
+}
+
+.app-shell__brand {
+  margin: 0 0 24px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.app-shell__nav {
+  display: grid;
+  gap: 8px;
+}
+
+.app-shell__nav-item {
+  border-radius: 6px;
+  color: #334155;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.app-shell__nav-item--active {
+  background: #e8f2ff;
+  color: #0f4c81;
+  font-weight: 600;
+}
+
+.app-shell__main {
+  min-width: 0;
+  padding: 24px;
+}
+
+.dashboard {
+  display: grid;
+  gap: 20px;
+}
+
+.dashboard__header h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.dashboard__header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.metric {
+  border: 1px solid #d7dce2;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.metric__label {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.metric__value {
+  margin-top: 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell__sidebar {
+    border-right: 0;
+    border-bottom: 1px solid #d7dce2;
+  }
+
+  .dashboard__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
