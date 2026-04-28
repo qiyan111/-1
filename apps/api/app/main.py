@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.exceptions import register_exception_handlers
+from app.core.exceptions import AppError, register_exception_handlers
+from app.db.health import check_database_connection
+from app.db.session import get_db
 
 
 def create_app() -> FastAPI:
@@ -33,6 +37,18 @@ def create_app() -> FastAPI:
             "environment": settings.app_env,
             "version": settings.app_version,
         }
+
+    @application.get("/health/db", tags=["system"])
+    def health_db(db: Session = Depends(get_db)) -> dict[str, str]:
+        try:
+            check_database_connection(db)
+        except SQLAlchemyError as exc:
+            raise AppError(
+                "Database connection failed",
+                status_code=503,
+                code="database_unavailable",
+            ) from exc
+        return {"status": "ok", "database": "ok"}
 
     return application
 

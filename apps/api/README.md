@@ -35,3 +35,33 @@ cd apps/api
 pytest
 ```
 
+## 数据库与 migration
+
+本阶段只接入 SQLAlchemy 和 Alembic，不创建业务表。`DATABASE_URL` 为空时，应用会使用 `POSTGRES_*` 变量拼接 PostgreSQL 连接串。
+
+启动本地 PostgreSQL：
+
+```bash
+docker compose up -d postgres
+```
+
+查看当前 migration 状态：
+
+```bash
+cd apps/api
+alembic current
+```
+
+后续新增模型后生成 migration：
+
+```bash
+cd apps/api
+alembic revision --autogenerate -m "create users roles permissions"
+alembic upgrade head
+```
+
+数据库健康检查：
+
+```bash
+curl http://127.0.0.1:8000/health/db
+```
