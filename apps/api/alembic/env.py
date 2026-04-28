@@ -9,6 +9,7 @@ from app.core.config import get_settings
 from app.db.base import Base
 import app.audit.models  # noqa: F401
 import app.projects.models  # noqa: F401
+import app.templates.models  # noqa: F401
 import app.uploads.models  # noqa: F401
 import app.users.models  # noqa: F401
 

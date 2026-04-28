@@ -180,3 +180,39 @@ curl -X POST http://127.0.0.1:8000/api/tubes/1/marker-mappings ^
 ```
 
 本阶段 migration 新增 `projects`、`experiments`、`samples`、`tubes`、`channels`、`marker_mappings`、`compensation_matrices`，并为 `data_files` 增加可空的 `tube_id` 关联字段。
+
+## 分析模板 CRUD
+
+模板读取需要 `template:read` 权限；创建、更新、删除和克隆需要 `template:write` 权限。所有修改操作会写入审计日志。
+
+创建模板：
+```bash
+curl -X POST http://127.0.0.1:8000/api/templates ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"AML Screening Template\",\"project_code\":\"FLOW-AML\",\"plots\":[{\"title\":\"CD45 SSC\",\"tube_no\":\"T-001\",\"x_channel\":\"CD45\",\"y_channel\":\"SSC-A\",\"plot_type\":\"scatter\"}],\"gates\":[{\"gate_key\":\"lym\",\"name\":\"Lymphocytes\",\"gate_type\":\"polygon\",\"definition\":{\"points\":[[1,1],[2,1],[2,2]]}}],\"logic_gates\":[{\"name\":\"LYM NOT NK\",\"expression\":\"LYM NOT NK\"}],\"statistics\":[{\"name\":\"Percent Parent\",\"rule_type\":\"percent_parent\",\"formula\":\"event_count / parent_event_count\"}]}"
+```
+
+查询、更新、删除和克隆：
+```bash
+curl http://127.0.0.1:8000/api/templates ^
+  -H "Authorization: Bearer <access_token>"
+
+curl http://127.0.0.1:8000/api/templates/1 ^
+  -H "Authorization: Bearer <access_token>"
+
+curl -X PUT http://127.0.0.1:8000/api/templates/1 ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"Updated Template\",\"project_code\":\"FLOW-AML\",\"plots\":[],\"gates\":[],\"logic_gates\":[],\"statistics\":[]}"
+
+curl -X POST http://127.0.0.1:8000/api/templates/1/clone ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"AML Screening Template Clone\"}"
+
+curl -X DELETE http://127.0.0.1:8000/api/templates/1 ^
+  -H "Authorization: Bearer <access_token>"
+```
+
+本阶段 migration 新增 `analysis_templates`、`template_plots`、`template_gates`、`template_logic_gates`、`template_statistics`。本阶段不包含模板版本历史、diff 或门控计算。
