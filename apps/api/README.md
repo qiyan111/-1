@@ -215,4 +215,22 @@ curl -X DELETE http://127.0.0.1:8000/api/templates/1 ^
   -H "Authorization: Bearer <access_token>"
 ```
 
-本阶段 migration 新增 `analysis_templates`、`template_plots`、`template_gates`、`template_logic_gates`、`template_statistics`。本阶段不包含模板版本历史、diff 或门控计算。
+模板创建、更新和克隆需要提供 `change_note`，系统会生成不可覆盖的版本快照。模板版本接口：
+
+```bash
+curl http://127.0.0.1:8000/api/templates/1/versions ^
+  -H "Authorization: Bearer <access_token>"
+
+curl http://127.0.0.1:8000/api/templates/1/versions/1 ^
+  -H "Authorization: Bearer <access_token>"
+
+curl "http://127.0.0.1:8000/api/templates/1/diff?from_version_id=1&to_version_id=2" ^
+  -H "Authorization: Bearer <access_token>"
+
+curl -X POST http://127.0.0.1:8000/api/templates/1/rollback ^
+  -H "Authorization: Bearer <access_token>" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"version_id\":1,\"change_note\":\"rollback to validated baseline\"}"
+```
+
+rollback 会把模板恢复到指定版本快照，并生成新的当前版本，不覆盖旧版本。diff 当前返回图表、门控、逻辑门、统计规则和通道配置的摘要差异。本阶段 migration 新增 `analysis_templates`、`analysis_template_versions`、`template_plots`、`template_gates`、`template_logic_gates`、`template_statistics`。

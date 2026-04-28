@@ -57,6 +57,36 @@ class AnalysisTemplate(Base):
         lazy="selectin",
         order_by="TemplateStatistic.sort_order",
     )
+    versions: Mapped[list[AnalysisTemplateVersion]] = relationship(
+        back_populates="template",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+        order_by="AnalysisTemplateVersion.version",
+    )
+
+
+class AnalysisTemplateVersion(Base):
+    __tablename__ = "analysis_template_versions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    template_id: Mapped[int] = mapped_column(
+        ForeignKey("analysis_templates.id", ondelete="CASCADE"),
+        index=True,
+    )
+    version: Mapped[int] = mapped_column(nullable=False, index=True)
+    snapshot_json: Mapped[dict[str, Any]] = mapped_column(JSON)
+    change_note: Mapped[str] = mapped_column(Text)
+    created_by: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    template: Mapped[AnalysisTemplate] = relationship(back_populates="versions")
 
 
 class TemplatePlot(Base):

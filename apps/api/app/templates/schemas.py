@@ -46,6 +46,7 @@ class TemplateStatisticBase(BaseModel):
 class TemplateCreate(BaseModel):
     name: str
     project_code: str
+    change_note: str = Field(min_length=1)
     plots: list[TemplatePlotBase] = Field(default_factory=list)
     gates: list[TemplateGateBase] = Field(default_factory=list)
     logic_gates: list[TemplateLogicGateBase] = Field(default_factory=list)
@@ -58,6 +59,12 @@ class TemplateUpdate(TemplateCreate):
 
 class TemplateClone(BaseModel):
     name: str | None = None
+    change_note: str = Field(min_length=1)
+
+
+class TemplateRollback(BaseModel):
+    version_id: int
+    change_note: str = Field(min_length=1)
 
 
 class TemplatePlotResponse(TemplatePlotBase):
@@ -98,3 +105,15 @@ class TemplateResponse(BaseModel):
     gates: list[TemplateGateResponse]
     logic_gates: list[TemplateLogicGateResponse]
     statistics: list[TemplateStatisticResponse]
+
+
+class TemplateVersionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    template_id: int
+    version: int
+    snapshot_json: dict[str, Any]
+    change_note: str
+    created_by: int
+    created_at: datetime
