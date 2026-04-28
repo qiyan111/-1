@@ -60,6 +60,13 @@ alembic revision --autogenerate -m "create users roles permissions"
 alembic upgrade head
 ```
 
+初始化默认角色与权限：
+
+```bash
+cd apps/api
+python -m app.users.seed
+```
+
 数据库健康检查：
 
 ```bash
